@@ -21,7 +21,7 @@
         <java.version>1.8</java.version>
         <mybatis-plus.version>3.0.5</mybatis-plus.version>
         <velocity.version>2.0</velocity.version>
-        <swagger.version>2.7.0</swagger.version>
+        <swagger.version>2.9.2</swagger.version>
         <httpclient.version>4.5.1</httpclient.version>
         <gson.version>2.8.2</gson.version>
         <jwt.version>0.7.0</jwt.version>
@@ -55,38 +55,38 @@
             <artifactId>lombok</artifactId>
         </dependency>
 
-<!--        &lt;!&ndash;mysql&ndash;&gt;-->
-<!--        <dependency>-->
-<!--            <groupId>mysql</groupId>-->
-<!--            <artifactId>mysql-connector-java</artifactId>-->
-<!--        </dependency>-->
+        <!--mysql-->
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+        </dependency>
 
-<!--        &lt;!&ndash;mybatis-plus 持久层&ndash;&gt;-->
-<!--        <dependency>-->
-<!--            <groupId>com.baomidou</groupId>-->
-<!--            <artifactId>mybatis-plus-boot-starter</artifactId>-->
-<!--            <version>${mybatis-plus.version}</version>-->
-<!--        </dependency>-->
+        <!--mybatis-plus 持久层-->
+        <dependency>
+            <groupId>com.baomidou</groupId>
+            <artifactId>mybatis-plus-boot-starter</artifactId>
+            <version>${mybatis-plus.version}</version>
+        </dependency>
 
-<!--        &lt;!&ndash; velocity 模板引擎， mybatis-plus 代码生成器需要 &ndash;&gt;-->
-<!--        <dependency>-->
-<!--            <groupId>org.apache.velocity</groupId>-->
-<!--            <artifactId>velocity-engine-core</artifactId>-->
-<!--            <version>${velocity.version}</version>-->
-<!--        </dependency>-->
+        <!-- velocity 模板引擎， mybatis-plus 代码生成器需要 -->
+        <dependency>
+            <groupId>org.apache.velocity</groupId>
+            <artifactId>velocity-engine-core</artifactId>
+            <version>${velocity.version}</version>
+        </dependency>
 
-<!--        &lt;!&ndash;swagger&ndash;&gt;-->
-<!--        <dependency>-->
-<!--            <groupId>io.springfox</groupId>-->
-<!--            <artifactId>springfox-swagger2</artifactId>-->
-<!--            <version>${swagger.version}</version>-->
-<!--        </dependency>-->
-<!--        &lt;!&ndash;swagger ui&ndash;&gt;-->
-<!--        <dependency>-->
-<!--            <groupId>io.springfox</groupId>-->
-<!--            <artifactId>springfox-swagger-ui</artifactId>-->
-<!--            <version>${swagger.version}</version>-->
-<!--        </dependency>-->
+        <!--swagger-->
+        <dependency>
+            <groupId>io.springfox</groupId>
+            <artifactId>springfox-swagger2</artifactId>
+            <version>${swagger.version}</version>
+        </dependency>
+        <!--swagger ui-->
+        <dependency>
+            <groupId>io.springfox</groupId>
+            <artifactId>springfox-swagger-ui</artifactId>
+            <version>${swagger.version}</version>
+        </dependency>
 
 <!--        &lt;!&ndash;httpclient&ndash;&gt;-->
 <!--        <dependency>-->
