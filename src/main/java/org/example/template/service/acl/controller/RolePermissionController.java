@@ -7,11 +7,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * <p>
- *  前端控制器
+ * 角色权限 前端控制器
  * </p>
  *
  * @author lyj
- * @since 2023-08-14
+ * @since 2023-08-15
  */
 @RestController
 @RequestMapping("/acl/role-permission")

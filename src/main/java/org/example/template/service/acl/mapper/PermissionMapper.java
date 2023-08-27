@@ -5,11 +5,11 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
 /**
  * <p>
- *  Mapper 接口
+ * 权限表 Mapper 接口
  * </p>
  *
  * @author lyj
- * @since 2023-08-14
+ * @since 2023-08-15
  */
 public interface PermissionMapper extends BaseMapper<Permission> {
 

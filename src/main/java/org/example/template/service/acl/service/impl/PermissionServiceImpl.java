@@ -8,11 +8,11 @@ import org.springframework.stereotype.Service;
 
 /**
  * <p>
- *  服务实现类
+ * 权限表 服务实现类
  * </p>
  *
  * @author lyj
- * @since 2023-08-14
+ * @since 2023-08-15
  */
 @Service
 public class PermissionServiceImpl extends ServiceImpl<PermissionMapper, Permission> implements PermissionService {

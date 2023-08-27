@@ -8,17 +8,13 @@ import org.springframework.stereotype.Service;
 
 /**
  * <p>
- *  服务实现类
+ * 用户 服务实现类
  * </p>
  *
  * @author lyj
- * @since 2023-08-14
+ * @since 2023-08-15
  */
 @Service
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
 
-    @Override
-    public void insertUser(User user) {
-        baseMapper.insert(user);
-    }
 }

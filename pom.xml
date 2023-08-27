@@ -68,14 +68,14 @@
             <version>${mybatis-plus.version}</version>
         </dependency>
 
-        <!-- velocity 模板引擎， mybatis-plus 代码生成器需要 -->
+        <!--velocity 模板引擎， mybatis-plus 代码生成器需要-->
         <dependency>
             <groupId>org.apache.velocity</groupId>
             <artifactId>velocity-engine-core</artifactId>
             <version>${velocity.version}</version>
         </dependency>
 
-        <!--swagger-->
+        <!--swagger 自动生成文档-->
         <dependency>
             <groupId>io.springfox</groupId>
             <artifactId>springfox-swagger2</artifactId>
