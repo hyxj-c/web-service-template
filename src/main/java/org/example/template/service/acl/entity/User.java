@@ -14,6 +14,8 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
+import javax.validation.constraints.NotNull;
+
 /**
  * <p>
  * 用户
@@ -36,9 +38,11 @@ public class User implements Serializable {
     private String id;
 
     @ApiModelProperty(value = "用户名")
+    @NotNull(message = "用户名不能为空")
     private String username;
 
     @ApiModelProperty(value = "密码")
+    @NotNull(message = "密码不能为空")
     private String password;
 
     @ApiModelProperty(value = "角色名")
