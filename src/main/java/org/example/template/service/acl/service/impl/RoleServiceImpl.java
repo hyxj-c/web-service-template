@@ -1,6 +1,7 @@
 package org.example.template.service.acl.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.example.template.common.utils.Response;
 import org.example.template.service.acl.entity.Role;
 import org.example.template.service.acl.mapper.RoleMapper;
@@ -18,6 +19,19 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements RoleService {
+
+    @Override
+    public Response getRoleList(long currentPage, long pageSize, Role role) {
+        Page<Role> page = new Page<>(currentPage, pageSize);
+        QueryWrapper<Role> wrapper = new QueryWrapper<>();
+        wrapper.select("id", "name");
+        if (role.getName() != null) {
+            wrapper.like("name", role.getName());
+        }
+        this.page(page, wrapper);
+
+        return Response.success().data("total", page.getTotal()).data("items", page.getRecords());
+    }
 
     @Override
     public Response addRole(Role role) {

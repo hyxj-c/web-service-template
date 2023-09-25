@@ -12,7 +12,7 @@ import java.util.Map;
 public class Response {
     private Boolean success; // 是否成功
     private Integer code; // 状态码
-    private String msg; // 响应消息
+    private String message; // 响应消息
     private Map<String, Object> data = new HashMap<>(); // 响应数据
 
     private Response(){}
@@ -25,7 +25,7 @@ public class Response {
         Response response = new Response();
         response.success = true;
         response.code = ResponseCode.SUCCESS;
-        response.msg = "成功";
+        response.message = "成功";
 
         return response;
     }
@@ -38,7 +38,7 @@ public class Response {
         Response response = new Response();
         response.success = false;
         response.code = ResponseCode.ERROR;
-        response.msg = "失败";
+        response.message = "失败";
 
         return response;
     }
@@ -56,7 +56,7 @@ public class Response {
     }
 
     public Response message(String message) {
-        this.msg = message;
+        this.message = message;
 
         return this;
     }

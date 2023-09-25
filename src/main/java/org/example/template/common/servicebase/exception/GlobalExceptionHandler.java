@@ -2,6 +2,9 @@ package org.example.template.common.servicebase.exception;
 
 import lombok.extern.slf4j.Slf4j;
 import org.example.template.common.utils.Response;
+import org.example.template.common.utils.ResponseCode;
+import org.springframework.validation.ObjectError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -16,7 +19,7 @@ public class GlobalExceptionHandler {
     // 全局异常
     @ExceptionHandler(Exception.class)
     @ResponseBody
-    public Response error(Exception e) {
+    public Response exceptionHandler(Exception e) {
         e.printStackTrace();
         // 输出错误日志，以便写入日志文件
         log.error(e.getClass().getName() + "--" + e.getMessage());
@@ -24,22 +27,35 @@ public class GlobalExceptionHandler {
         return Response.error().message("出错了，请稍后再试...");
     }
 
+    // 参数验证失败异常
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    @ResponseBody
+    public Response methodArgumentNotValidExceptionHandler(MethodArgumentNotValidException e) {
+        e.printStackTrace();
+        log.error("MethodArgumentNotValidException--" + e.getMessage());
+
+        // 从异常对象中拿到ObjectError对象
+        ObjectError objectError = e.getBindingResult().getAllErrors().get(0);
+
+        return Response.error().code(ResponseCode.ARGUMENT_VALIDATE_ERROR).message(objectError.getDefaultMessage());
+    }
+
     // 特定异常
     @ExceptionHandler(ArithmeticException.class)
     @ResponseBody
-    public Response error(ArithmeticException e) {
+    public Response arithmeticExceptionHandler(ArithmeticException e) {
         e.printStackTrace();
         log.error("ArithmeticException--" + e.getMessage());
 
         return Response.error().message("执行了特定异常");
     }
 
-    // 自定义异常
-    @ExceptionHandler(MyException.class)
+    // 自定义业务异常
+    @ExceptionHandler(ServiceException.class)
     @ResponseBody
-    public Response error(MyException e) {
+    public Response serviceExceptionHandler(ServiceException e) {
         e.printStackTrace();
-        log.error("MyException--" + e.getMsg());
+        log.error("ServiceException--" + e.getMsg());
 
         return Response.error().code(e.getCode()).message(e.getMsg());
     }

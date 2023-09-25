@@ -15,6 +15,15 @@ import com.baomidou.mybatisplus.extension.service.IService;
 public interface RoleService extends IService<Role> {
 
     /**
+     * 分页获取角色列表
+     * @param currentPage 当前页
+     * @param pageSize 每页大小
+     * @param role 要进行筛选查询的role对象
+     * @return 响应对象
+     */
+    Response getRoleList(long currentPage, long pageSize, Role role);
+
+    /**
      * 添加角色
      * @param role 角色对象
      * @return 响应对象
@@ -27,4 +36,6 @@ public interface RoleService extends IService<Role> {
      * @return 响应对象
      */
     Response updateRole(Role role);
+
+
 }

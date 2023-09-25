@@ -1,15 +1,16 @@
 package org.example.template.service.acl.controller;
 
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.example.template.common.utils.Response;
 import org.example.template.service.acl.entity.Role;
 import org.example.template.service.acl.service.RoleService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * <p>
@@ -29,21 +30,29 @@ public class RoleController {
     @ApiOperation(value = "获取角色列表")
     public Response getRoles(
             @ApiParam(value = "要查询的页数", required = true) @PathVariable long current,
-            @ApiParam(value = "每页显示的条数", required = true) @PathVariable long size
+            @ApiParam(value = "每页显示的条数", required = true) @PathVariable long size,
+            @ApiParam(value = "查询对象", required = false) Role role
     ) {
-        Page<Role> page = new Page<>(current, size);
-        QueryWrapper<Role> wrapper = new QueryWrapper<>();
-        wrapper.select("name");
-        roleService.page(page, wrapper);
+        Response response = roleService.getRoleList(current, size, role);
 
-        return Response.success().data("total", page.getTotal()).data("items", page.getRecords());
+        return response;
+    }
+
+    @GetMapping("{id}")
+    @ApiOperation(value = "根据id查询角色信息")
+    public Response getRoleById(
+            @ApiParam(value = "角色id", required = true) @PathVariable String id
+    ) {
+        Role role = roleService.getById(id);
+
+        return Response.success().data("item", role);
     }
 
     @PostMapping
     @ApiOperation(value = "添加角色")
     public Response addRole(
             @ApiParam(value = "角色对象，只有name属性是必须的，其它属性自动生成", required = true)
-            @RequestBody Role role
+            @Validated @RequestBody Role role
     ) {
         Response response = roleService.addRole(role);
 
@@ -64,6 +73,14 @@ public class RoleController {
         roleService.removeById(id);
 
         return Response.success().message("删除成功！");
+    }
+
+    @DeleteMapping
+    @ApiOperation(value = "根据id列表批量删除角色")
+    public Response batchRemoveRoles(@RequestBody List<String> idList) {
+        roleService.removeByIds(idList);
+
+        return Response.success().message("删除成功");
     }
 
 }
