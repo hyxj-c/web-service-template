@@ -4,6 +4,8 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import org.example.template.common.utils.Response;
 import org.example.template.service.acl.entity.User;
 
+import java.util.List;
+
 /**
  * <p>
  * 用户 服务类
@@ -36,4 +38,11 @@ public interface UserService extends IService<User> {
      * @return 响应对象
      */
     Response updateUser(User user);
+
+    /**
+     * 设置用户角色
+     * @param userId 用户id
+     * @param roleIdList 角色id列表
+     */
+    void saveUserRoleRelation(String userId, List<String> roleIdList);
 }

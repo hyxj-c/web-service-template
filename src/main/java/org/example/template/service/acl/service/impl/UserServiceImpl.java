@@ -1,15 +1,23 @@
 package org.example.template.service.acl.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.extension.api.R;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.example.template.common.utils.Response;
 import org.example.template.service.acl.entity.Role;
 import org.example.template.service.acl.entity.User;
+import org.example.template.service.acl.entity.UserRole;
 import org.example.template.service.acl.mapper.UserMapper;
+import org.example.template.service.acl.service.RoleService;
+import org.example.template.service.acl.service.UserRoleService;
 import org.example.template.service.acl.service.UserService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -21,6 +29,11 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
+    @Autowired
+    private UserRoleService userRoleService;
+
+    @Autowired
+    private RoleService roleService;
 
     @Override
     public Response getUserList(long currentPage, long pageSize, User user) {
@@ -59,6 +72,37 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         baseMapper.updateById(user);
 
         return Response.success().message("修改成功！");
+    }
+
+    @Override
+    @Transactional
+    public void saveUserRoleRelation(String userId, List<String> roleIdList) {
+        // 1.删除当前用户的角色
+        userRoleService.remove(new QueryWrapper<UserRole>().eq("user_id", userId));
+
+        // 2.设置当前用户的角色
+        ArrayList<UserRole> userRolesList = new ArrayList<>();
+        for (String roleId : roleIdList) {
+            UserRole userRole = new UserRole();
+            userRole.setUserId(userId);
+            userRole.setRoleId(roleId);
+            userRolesList.add(userRole);
+        }
+        userRoleService.saveBatch(userRolesList);
+
+        // 3.查询出要设置的角色名
+        String roleNames = "";
+        if (!roleIdList.isEmpty()) {
+            List<Role> roleList = roleService.list(new QueryWrapper<Role>().select("name").in("id", roleIdList));
+            List<String> roleNameList = roleList.stream().map(role -> role.getName()).collect(Collectors.toList());
+            roleNames = String.join("，", roleNameList );
+        }
+
+        // 4.设置当前用户的角色名
+        User user = new User();
+        user.setId(userId);
+        user.setRoleName(roleNames);
+        baseMapper.updateById(user);
     }
 
     /**

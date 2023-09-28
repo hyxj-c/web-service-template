@@ -4,6 +4,8 @@ import org.example.template.common.utils.Response;
 import org.example.template.service.acl.entity.Role;
 import com.baomidou.mybatisplus.extension.service.IService;
 
+import java.util.List;
+
 /**
  * <p>
  * 角色表 服务类
@@ -24,6 +26,12 @@ public interface RoleService extends IService<Role> {
     Response getRoleList(long currentPage, long pageSize, Role role);
 
     /**
+     * 获取所有角色
+     * @return 角色列表
+     */
+    List<Role> getAllRoles();
+
+    /**
      * 添加角色
      * @param role 角色对象
      * @return 响应对象
@@ -37,5 +45,22 @@ public interface RoleService extends IService<Role> {
      */
     Response updateRole(Role role);
 
+    /**
+     * 删除角色
+     * @param id 角色id
+     */
+    void removeRoleById(String id);
 
+    /**
+     * 批量删除角色
+     * @param idList 角色id列表
+     */
+    void batchRemoveRoles(List<String> idList);
+
+    /**
+     * 根据用户id获取该用户分配的角色id
+     * @param userId 用户id
+     * @return 角色id列表
+     */
+    List<String> getAssignedRoleIdsByUserId(String userId);
 }

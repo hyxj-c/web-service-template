@@ -40,9 +40,7 @@ public class UserController {
 
     @GetMapping("{id}")
     @ApiOperation(value = "根据id查询用户信息")
-    public Response getRoleById(
-            @ApiParam(value = "用户id", required = true) @PathVariable String id
-    ) {
+    public Response getUserById(@PathVariable String id) {
         User user = userService.getById(id);
 
         return Response.success().data("item", user);
@@ -74,10 +72,20 @@ public class UserController {
 
     @DeleteMapping
     @ApiOperation(value = "根据id列表批量删除用户")
-    public Response batchRemoveRoles(@RequestBody List<String> idList) {
+    public Response batchRemoveUsers(
+            @ApiParam(value = "用户id数组", required = true) @RequestBody List<String> idList
+    ) {
         userService.removeByIds(idList);
 
         return Response.success().message("删除成功");
+    }
+
+    @PostMapping("assignRole")
+    @ApiOperation(value = "给用户分配角色")
+    public Response assignRole(@RequestParam String userId, @RequestBody List<String> roleIdList) {
+        userService.saveUserRoleRelation(userId, roleIdList);
+
+        return Response.success().message("分配成功");
     }
 
 }
