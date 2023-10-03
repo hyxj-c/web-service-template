@@ -40,9 +40,22 @@ public interface UserService extends IService<User> {
     Response updateUser(User user);
 
     /**
+     * 根据用户id删除用户
+     * @param id 用户id
+     */
+    void removeUserById(String id);
+
+    /**
+     * 批量删除用户
+     * @param idList 用户id列表
+     */
+    void batchRemoveUsers(List<String> idList);
+
+    /**
      * 设置用户角色
      * @param userId 用户id
      * @param roleIdList 角色id列表
      */
     void saveUserRoleRelation(String userId, List<String> roleIdList);
+
 }

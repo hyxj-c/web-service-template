@@ -65,7 +65,7 @@ public class UserController {
     @DeleteMapping("{id}")
     @ApiOperation(value = "删除用户")
     public Response removeUser(@PathVariable String id) {
-        userService.removeById(id);
+        userService.removeUserById(id);
 
         return Response.success().message("删除成功！");
     }
@@ -75,7 +75,7 @@ public class UserController {
     public Response batchRemoveUsers(
             @ApiParam(value = "用户id数组", required = true) @RequestBody List<String> idList
     ) {
-        userService.removeByIds(idList);
+        userService.batchRemoveUsers(idList);
 
         return Response.success().message("删除成功");
     }

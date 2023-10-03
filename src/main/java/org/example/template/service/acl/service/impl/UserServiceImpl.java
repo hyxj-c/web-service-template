@@ -76,6 +76,26 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Override
     @Transactional
+    public void removeUserById(String id) {
+         // 删除该用户的角色(用户角色关系)
+        userRoleService.remove(new QueryWrapper<UserRole>().eq("user_id", id));
+
+        // 删除该用户
+        baseMapper.deleteById(id);
+    }
+
+    @Override
+    @Transactional
+    public void batchRemoveUsers(List<String> idList) {
+        // 批量删除用户的角色
+        userRoleService.remove(new QueryWrapper<UserRole>().in("user_id", idList));
+
+        // 批量删除用户
+        baseMapper.deleteBatchIds(idList);
+    }
+
+    @Override
+    @Transactional
     public void saveUserRoleRelation(String userId, List<String> roleIdList) {
         // 1.删除当前用户的角色
         userRoleService.remove(new QueryWrapper<UserRole>().eq("user_id", userId));
@@ -95,7 +115,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         if (!roleIdList.isEmpty()) {
             List<Role> roleList = roleService.list(new QueryWrapper<Role>().select("name").in("id", roleIdList));
             List<String> roleNameList = roleList.stream().map(role -> role.getName()).collect(Collectors.toList());
-            roleNames = String.join("，", roleNameList );
+            roleNames = String.join("、", roleNameList );
         }
 
         // 4.设置当前用户的角色名
