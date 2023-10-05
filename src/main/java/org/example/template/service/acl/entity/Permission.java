@@ -1,18 +1,16 @@
 package org.example.template.service.acl.entity;
 
-import com.baomidou.mybatisplus.annotation.TableName;
-import com.baomidou.mybatisplus.annotation.IdType;
-import java.util.Date;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.FieldFill;
-import com.baomidou.mybatisplus.annotation.TableLogic;
-import com.baomidou.mybatisplus.annotation.TableField;
-import java.io.Serializable;
+import com.baomidou.mybatisplus.annotation.*;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
+
+import javax.validation.constraints.NotNull;
+import java.io.Serializable;
+import java.util.Date;
+import java.util.List;
 
 /**
  * <p>
@@ -36,13 +34,16 @@ public class Permission implements Serializable {
     private String id;
 
     @ApiModelProperty(value = "父级id")
+    @NotNull(message = "父级id不能为空")
     private String pid;
 
     @ApiModelProperty(value = "权限名称")
+    @NotNull(message = "名称不能为空")
     private String name;
 
     @ApiModelProperty(value = "类型(1:菜单，2：按钮)")
-    private Boolean type;
+    @NotNull(message = "类型不能为空")
+    private Integer type;
 
     @ApiModelProperty(value = "权限值")
     private String permissionValue;
@@ -57,7 +58,19 @@ public class Permission implements Serializable {
     private String icon;
 
     @ApiModelProperty(value = "状态(0:禁止，1：正常)，默认为1")
-    private Boolean status;
+    private Integer status;
+
+    @ApiModelProperty(value = "层级")
+    @TableField(exist = false)
+    private Integer level;
+
+    @ApiModelProperty(value = "下级")
+    @TableField(exist = false)
+    private List<Permission> children;
+
+    @ApiModelProperty(value = "是否选中")
+    @TableField(exist = false)
+    private Boolean selected;
 
     @ApiModelProperty(value = "逻辑删除，0为未删除，1为已删除，默认为0")
     @TableLogic
