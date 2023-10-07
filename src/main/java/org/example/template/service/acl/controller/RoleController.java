@@ -98,7 +98,15 @@ public class RoleController {
     ) {
         roleService.batchRemoveRoles(idList);
 
-        return Response.success().message("删除成功");
+        return Response.success().message("删除成功！");
+    }
+
+    @PostMapping("assignPermission")
+    @ApiOperation(value = "给角色分配权限")
+    public Response assignPermission(@RequestParam String roleId, @RequestBody List<String> permissionIdList) {
+        roleService.saveRolePermissionRelation(roleId, permissionIdList);
+
+        return Response.success().message("分配成功！");
     }
 
 }

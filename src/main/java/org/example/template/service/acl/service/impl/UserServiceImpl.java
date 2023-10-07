@@ -2,6 +2,7 @@ package org.example.template.service.acl.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.example.template.common.utils.Response;
 import org.example.template.service.acl.entity.Role;
 import org.example.template.service.acl.entity.User;
@@ -10,7 +11,6 @@ import org.example.template.service.acl.mapper.UserMapper;
 import org.example.template.service.acl.service.RoleService;
 import org.example.template.service.acl.service.UserRoleService;
 import org.example.template.service.acl.service.UserService;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -77,7 +77,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Override
     @Transactional
     public void removeUserById(String id) {
-         // 删除该用户的角色(用户角色关系)
+        // 删除该用户的角色(用户角色关系)
         userRoleService.remove(new QueryWrapper<UserRole>().eq("user_id", id));
 
         // 删除该用户
@@ -87,11 +87,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Override
     @Transactional
     public void batchRemoveUsers(List<String> idList) {
-        // 批量删除用户的角色
-        userRoleService.remove(new QueryWrapper<UserRole>().in("user_id", idList));
+        if (!idList.isEmpty()) {
+            // 批量删除用户的角色
+            userRoleService.remove(new QueryWrapper<UserRole>().in("user_id", idList));
 
-        // 批量删除用户
-        baseMapper.deleteBatchIds(idList);
+            // 批量删除用户
+            baseMapper.deleteBatchIds(idList);
+        }
     }
 
     @Override

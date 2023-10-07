@@ -44,13 +44,8 @@ public class PermissionServiceImpl extends ServiceImpl<PermissionMapper, Permiss
         List<Permission> permissionList = baseMapper
                 .selectList(new QueryWrapper<Permission>().select("id", "pid", "name"));
 
-        // 根据角色id获取该角色分配的所有权限
-        List<RolePermission> rolePermissionList = rolePermissionService
-                .list(new QueryWrapper<RolePermission>().select("permission_id").eq("role_id", roleId));
-
-        // 把角色权限集合转换为权限id集合
-        List<String> permissionIdList = rolePermissionList.stream()
-                .map(rolePermission -> rolePermission.getPermissionId()).collect(Collectors.toList());
+        // 根据角色id获取该角色分配的所有权限的id
+        List<String> permissionIdList = rolePermissionService.getPermissionIdListByRoleId(roleId);
 
         // 把该角色拥有的权限设置为选中状态
         for (Permission permission : permissionList) {

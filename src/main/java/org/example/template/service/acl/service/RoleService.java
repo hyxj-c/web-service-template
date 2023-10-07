@@ -63,4 +63,11 @@ public interface RoleService extends IService<Role> {
      * @return 角色id列表
      */
     List<String> getAssignedRoleIdsByUserId(String userId);
+
+    /**
+     * 给角色分配权限
+     * @param roleId 角色id
+     * @param permissionIdList 要分配的权限id列表
+     */
+    void saveRolePermissionRelation(String roleId, List<String> permissionIdList);
 }

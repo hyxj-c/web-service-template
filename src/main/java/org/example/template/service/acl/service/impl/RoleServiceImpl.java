@@ -6,14 +6,22 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.example.template.common.servicebase.exception.ServiceException;
 import org.example.template.common.utils.Response;
 import org.example.template.common.utils.ResponseCode;
+import org.example.template.service.acl.entity.Permission;
 import org.example.template.service.acl.entity.Role;
+import org.example.template.service.acl.entity.RolePermission;
 import org.example.template.service.acl.entity.UserRole;
 import org.example.template.service.acl.mapper.RoleMapper;
+import org.example.template.service.acl.service.RolePermissionService;
 import org.example.template.service.acl.service.RoleService;
 import org.example.template.service.acl.service.UserRoleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -29,6 +37,9 @@ import java.util.stream.Collectors;
 public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements RoleService {
     @Autowired
     private UserRoleService userRoleService;
+
+    @Autowired
+    private RolePermissionService rolePermissionService;
 
     @Override
     public Response getRoleList(long currentPage, long pageSize, Role role) {
@@ -111,6 +122,44 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
                 .collect(Collectors.toList());
 
         return roleIdList;
+    }
+
+    @Override
+    @Transactional
+    public void saveRolePermissionRelation(String roleId, List<String> permissionIdList) {
+        // 根据角色id查询出该角色已分配的权限的id
+        List<String> assignedPermissionIdList = rolePermissionService.getPermissionIdListByRoleId(roleId);
+
+        // 过滤出要分配的权限id
+        List<String> assignIdList = new ArrayList<>(permissionIdList);
+        for (String permissionId : permissionIdList) {
+            if (assignedPermissionIdList.contains(permissionId)) {
+                assignIdList.remove(permissionId);
+            }
+        }
+
+        // 过滤出要删除的权限id
+        List<String> deleteIdList = new ArrayList<>(assignedPermissionIdList);
+        for (String permissionId : assignedPermissionIdList) {
+            if (permissionIdList.contains(permissionId)) {
+                deleteIdList.remove(permissionId);
+            }
+        }
+
+        // 删除之前已分配，但现在未分配的权限
+        if (!deleteIdList.isEmpty()) {
+            rolePermissionService.remove(new QueryWrapper<RolePermission>().in("permission_id", deleteIdList));
+        }
+
+        // 分配之前未分配，但现在需要分配的权限
+        List<RolePermission> rolePermissionList = new ArrayList<>();
+        for (String id : assignIdList) {
+            RolePermission rolePermission = new RolePermission();
+            rolePermission.setRoleId(roleId);
+            rolePermission.setPermissionId(id);
+            rolePermissionList.add(rolePermission);
+        }
+        rolePermissionService.saveBatch(rolePermissionList);
     }
 
     /**
