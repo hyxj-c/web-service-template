@@ -71,7 +71,7 @@ public class PermissionController {
     public Response batchRemovePermissions(
             @ApiParam(value = "权限id数组", required = true) @RequestBody List<String> idList
     ) {
-        permissionService.removeByIds(idList);
+        permissionService.batchRemovePermissions(idList);
 
         return Response.success().message("删除成功！");
     }

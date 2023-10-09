@@ -2,6 +2,8 @@ package org.example.template.service.acl.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import org.example.template.common.servicebase.exception.ServiceException;
+import org.example.template.common.utils.ResponseCode;
 import org.example.template.service.acl.entity.Permission;
 import org.example.template.service.acl.entity.RolePermission;
 import org.example.template.service.acl.mapper.PermissionMapper;
@@ -12,7 +14,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -69,8 +70,38 @@ public class PermissionServiceImpl extends ServiceImpl<PermissionMapper, Permiss
         // 递归查询子权限id值，并封装到idList
         queryPermissionChildById(id, idList);
 
+        // 判断是否有角色分配了要删除的权限
+        if (judgeRolePermission(idList)) {
+            throw new ServiceException(ResponseCode.SERVICE_ERROR, "有角色分配了要删除的权限，请先解除之后，在进行删除！");
+        }
+
         baseMapper.deleteBatchIds(idList);
 
+    }
+
+    @Override
+    public void batchRemovePermissions(List<String> idList) {
+        // 判断是否有角色分配了要删除的权限
+        if (judgeRolePermission(idList)) {
+            throw new ServiceException(ResponseCode.SERVICE_ERROR, "有角色分配了要删除的权限，请先解除之后，在进行删除！");
+        }
+
+        // 删除权限
+        baseMapper.deleteBatchIds(idList);
+    }
+
+    /**
+     * 判断是否有角色分配了要判断的权限
+     * @param permissionIdList 权限id列表
+     * @return 有角色分配返回true，无角色分配返回false
+     */
+    private boolean judgeRolePermission(List<String> permissionIdList) {
+        if (permissionIdList.isEmpty()) {
+            return false;
+        }
+        // 查询是否有角色分配了此权限
+        int count = rolePermissionService.count(new QueryWrapper<RolePermission>().in("permission_id", permissionIdList));
+        return count > 0;
     }
 
     /**

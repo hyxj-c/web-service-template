@@ -34,4 +34,9 @@ public interface PermissionService extends IService<Permission> {
      */
     void recursionRemovePermissionsById(String id);
 
+    /**
+     * 批量删除权限
+     * @param idList 权限id列表
+     */
+    void batchRemovePermissions(List<String> idList);
 }

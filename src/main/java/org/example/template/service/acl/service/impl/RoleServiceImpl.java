@@ -103,6 +103,9 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
 
     @Override
     public void batchRemoveRoles(List<String> idList) {
+        if (idList.isEmpty()) {
+            return;
+        }
         // 查询是否还有用户分配了要删除的角色
         int count = userRoleService.count(new QueryWrapper<UserRole>().in("role_id", idList));
         if (count > 0) {
