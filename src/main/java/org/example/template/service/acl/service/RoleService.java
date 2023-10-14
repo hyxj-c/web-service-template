@@ -48,14 +48,16 @@ public interface RoleService extends IService<Role> {
     /**
      * 删除角色
      * @param id 角色id
+     * @return
      */
-    void removeRoleById(String id);
+    Response removeRoleById(String id);
 
     /**
      * 批量删除角色
      * @param idList 角色id列表
+     * @return
      */
-    void batchRemoveRoles(List<String> idList);
+    Response batchRemoveRoles(List<String> idList);
 
     /**
      * 根据用户id获取该用户分配的角色id

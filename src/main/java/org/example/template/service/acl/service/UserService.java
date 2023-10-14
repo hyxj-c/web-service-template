@@ -1,10 +1,12 @@
 package org.example.template.service.acl.service;
 
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.extension.service.IService;
 import org.example.template.common.utils.Response;
 import org.example.template.service.acl.entity.User;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -57,5 +59,27 @@ public interface UserService extends IService<User> {
      * @param roleIdList 角色id列表
      */
     void saveUserRoleRelation(String userId, List<String> roleIdList);
+
+    /**
+     * 用户登录
+     * @param username 用户名
+     * @param password 密码
+     * @return 用户信息
+     */
+    User login(String username, String password);
+
+    /**
+     * 根据用户id获取该用户的信息
+     * @param userId 用户id
+     * @return 用户信息键值
+     */
+    Map<String, Object> getUserInfoByUserId(String userId);
+
+    /**
+     * 根据用户id获取该用户的权限路由
+     * @param userId 用户id
+     * @return 权限列表
+     */
+    List<JSONObject> getPermissionRouteByUserId(String userId);
 
 }

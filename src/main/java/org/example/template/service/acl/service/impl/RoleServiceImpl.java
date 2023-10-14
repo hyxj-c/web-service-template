@@ -3,10 +3,7 @@ package org.example.template.service.acl.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import org.example.template.common.servicebase.exception.ServiceException;
 import org.example.template.common.utils.Response;
-import org.example.template.common.utils.ResponseCode;
-import org.example.template.service.acl.entity.Permission;
 import org.example.template.service.acl.entity.Role;
 import org.example.template.service.acl.entity.RolePermission;
 import org.example.template.service.acl.entity.UserRole;
@@ -17,11 +14,8 @@ import org.example.template.service.acl.service.UserRoleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -90,30 +84,34 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
     }
 
     @Override
-    public void removeRoleById(String id) {
+    public Response removeRoleById(String id) {
         // 查询是否还有用户分配了此角色
         int count = userRoleService.count(new QueryWrapper<UserRole>().eq("role_id", id));
         if (count > 0) {
-            throw new ServiceException(ResponseCode.SERVICE_ERROR, "有用户分配了此角色，请先解除用户对该角色的分配，在删除");
+            return Response.error().message("有用户分配了此角色，请先解除用户对该角色的分配，在删除!");
         }
 
         // 进行删除
         baseMapper.deleteById(id);
+
+        return Response.success().message("删除成功！");
     }
 
     @Override
-    public void batchRemoveRoles(List<String> idList) {
+    public Response batchRemoveRoles(List<String> idList) {
         if (idList.isEmpty()) {
-            return;
+            return Response.error().message("请选择要删除的角色！");
         }
         // 查询是否还有用户分配了要删除的角色
         int count = userRoleService.count(new QueryWrapper<UserRole>().in("role_id", idList));
         if (count > 0) {
-            throw new ServiceException(ResponseCode.SERVICE_ERROR, "有用户分配了要删除的角色，请先解除用户对要删除角色的分配，在删除");
+            return  Response.error().message("有用户分配了要删除的角色，请先解除用户对要删除角色的分配，在删除!");
         }
 
         // 进行删除
         baseMapper.deleteBatchIds(idList);
+
+        return Response.success().message("删除成功！");
     }
 
     @Override
@@ -151,7 +149,8 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
 
         // 删除之前已分配，但现在未分配的权限
         if (!deleteIdList.isEmpty()) {
-            rolePermissionService.remove(new QueryWrapper<RolePermission>().in("permission_id", deleteIdList));
+            rolePermissionService.remove(new QueryWrapper<RolePermission>()
+                    .eq("role_id", roleId).in("permission_id", deleteIdList));
         }
 
         // 分配之前未分配，但现在需要分配的权限

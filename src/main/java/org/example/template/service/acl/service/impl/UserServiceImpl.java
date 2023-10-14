@@ -1,22 +1,29 @@
 package org.example.template.service.acl.service.impl;
 
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.sun.org.apache.xpath.internal.SourceTree;
 import org.example.template.common.utils.Response;
+import org.example.template.service.acl.entity.Permission;
 import org.example.template.service.acl.entity.Role;
 import org.example.template.service.acl.entity.User;
 import org.example.template.service.acl.entity.UserRole;
 import org.example.template.service.acl.mapper.UserMapper;
+import org.example.template.service.acl.service.PermissionService;
 import org.example.template.service.acl.service.RoleService;
 import org.example.template.service.acl.service.UserRoleService;
 import org.example.template.service.acl.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -31,9 +38,10 @@ import java.util.stream.Collectors;
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
     @Autowired
     private UserRoleService userRoleService;
-
     @Autowired
     private RoleService roleService;
+    @Autowired
+    private PermissionService permissionService;
 
     @Override
     public Response getUserList(long currentPage, long pageSize, User user) {
@@ -125,6 +133,103 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         user.setId(userId);
         user.setRoleName(roleNames);
         baseMapper.updateById(user);
+    }
+
+    @Override
+    public User login(String username, String password) {
+        QueryWrapper<User> queryWrapper = new QueryWrapper();
+        queryWrapper.select("id", "username", "role_name");
+        queryWrapper.eq("username", username).eq("password", password);
+        User user = baseMapper.selectOne(queryWrapper);
+
+        return user;
+    }
+
+    @Override
+    public Map<String, Object> getUserInfoByUserId(String userId) {
+        Map<String, Object> userInfo = new HashMap<>();
+        // 获取该用户信息
+        User user = baseMapper.selectById(userId);
+        if (user != null) {
+            userInfo.put("id", user.getId());
+            userInfo.put("username", user.getUsername());
+            userInfo.put("avatar", "头像地址");
+            if (StringUtils.hasLength(user.getRoleName())) {
+                userInfo.put("roles", user.getRoleName().split("、"));
+            }
+        }
+        // 获取用户的按钮权限值
+        List<String> buttonPermissionList = permissionService.getButtonPermissionValuesByUserId(userId);
+        userInfo.put("buttonPermissionList", buttonPermissionList);
+
+        return userInfo;
+    }
+
+    @Override
+    public List<JSONObject> getPermissionRouteByUserId(String userId) {
+        // 根据用户id获取已分配的权限树结构
+        List<Permission> permissionTree = permissionService.getAssignedPermissionTreeByUserId(userId);
+
+        // 构建前端路由菜单
+        List<JSONObject> routeMenu = buildRouteMenu(permissionTree);
+
+        return routeMenu;
+    }
+
+    /**
+     * 构建路由菜单
+     * @param permissionTree 权限树
+     * @return 路由菜单列表
+     */
+    private List<JSONObject> buildRouteMenu(List<Permission> permissionTree) {
+        // 最终构建好的路由菜单
+        List<JSONObject> routeMenu = new ArrayList<>();
+
+        if (permissionTree.size() == 1) {
+            // 获取顶级菜单（顶级菜单不作为路由）
+            Permission topMenu = permissionTree.get(0);
+            // 获取顶级菜单下的一级权限
+            List<Permission> onePermissionList = topMenu.getChildren();
+            // 进行路由构建
+            recursivelyBuild(routeMenu, onePermissionList);
+        }
+
+        return routeMenu;
+    }
+
+    /**
+     * 递归构建路由菜单
+     * @param routeMenu 封装构建好的路由菜单的集合
+     * @param permissionList 要构建的权限列表
+     */
+    private void recursivelyBuild(List<JSONObject> routeMenu, List<Permission> permissionList) {
+        for (Permission permission : permissionList) {
+            if (permission.getPath() == null || "".equals(permission.getPath())) {
+                continue;
+            }
+
+            JSONObject route = new JSONObject();
+            route.put("path", permission.getPath());
+            route.put("component", permission.getComponent());
+            route.put("name", permission.getName() + "_" + permission.getId());
+
+            JSONObject meta = new JSONObject();
+            meta.put("title", permission.getName());
+            meta.put("icon", permission.getIcon());
+            meta.put("hidden", permission.getType() == 2); // type为2是按钮，不进行菜单显示
+            route.put("meta", meta);
+
+            List<JSONObject> childrenRoute = new ArrayList<>();
+            route.put("children", childrenRoute);
+
+            routeMenu.add(route);
+
+            List<Permission> permissionChildrenList = permission.getChildren();
+            if (permissionChildrenList != null && permissionChildrenList.size() > 0) {
+                // 递归构建
+                recursivelyBuild(childrenRoute, permissionChildrenList);
+            }
+        }
     }
 
     /**

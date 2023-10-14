@@ -22,4 +22,11 @@ public interface RolePermissionService extends IService<RolePermission> {
      */
     List<String> getPermissionIdListByRoleId(String roleId);
 
+    /**
+     * 根据角色id列表获取角色分配的所有权限id
+     * @param roleIdList 角色id列表
+     * @return 权限id列表
+     */
+    List<String> getPermissionIdListByRoleIdList(List<String> roleIdList);
+
 }

@@ -1,5 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="org.example.template.service.acl.mapper.PermissionMapper">
+    <!--用于select查询公用抽取的列-->
+    <sql id="columns">
+        distinct p.id,p.pid,p.name,p.type,p.permission_value,p.path,p.component,p.icon,p.status,p.weight
+    </sql>
 
+    <!--根据用户id查询权限-->
+    <select id="selectPermissionByUserId" resultType="org.example.template.service.acl.entity.Permission">
+        SELECT
+            <include refid="columns"/>
+        FROM
+            acl_permission p
+        INNER JOIN
+            acl_role_permission rp ON p.`id` = rp.`permission_id`
+        INNER JOIN
+            acl_user_role ur ON rp.`role_id` = ur.`role_id`
+        WHERE
+            ur.`user_id` = #{userId}
+            AND p.`is_deleted` = 0
+            AND rp.`is_deleted` = 0
+            AND ur.`is_deleted` = 0
+    </select>
 </mapper>

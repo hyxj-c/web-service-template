@@ -86,9 +86,9 @@ public class RoleController {
     @DeleteMapping("{id}")
     @ApiOperation(value = "删除角色")
     public Response removeRole(@PathVariable String id) {
-        roleService.removeRoleById(id);
+        Response response = roleService.removeRoleById(id);
 
-        return Response.success().message("删除成功！");
+        return response;
     }
 
     @DeleteMapping
@@ -96,9 +96,9 @@ public class RoleController {
     public Response batchRemoveRoles(
             @ApiParam(value = "角色id数组", required = true) @RequestBody List<String> idList
     ) {
-        roleService.batchRemoveRoles(idList);
+        Response response = roleService.batchRemoveRoles(idList);
 
-        return Response.success().message("删除成功！");
+        return response;
     }
 
     @PostMapping("assignPermission")

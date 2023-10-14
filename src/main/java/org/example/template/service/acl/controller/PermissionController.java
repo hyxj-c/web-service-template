@@ -61,9 +61,9 @@ public class PermissionController {
     @DeleteMapping("recursionRemove/{id}")
     @ApiOperation(value = "递归删除权限")
     public Response recursionRemovePermissions(@PathVariable String id) {
-        permissionService.recursionRemovePermissionsById(id);
+        Response response = permissionService.recursionRemovePermissionsById(id);
 
-        return Response.success().message("删除成功！");
+        return response;
     }
 
     @DeleteMapping
@@ -71,9 +71,9 @@ public class PermissionController {
     public Response batchRemovePermissions(
             @ApiParam(value = "权限id数组", required = true) @RequestBody List<String> idList
     ) {
-        permissionService.batchRemovePermissions(idList);
+        Response response = permissionService.batchRemovePermissions(idList);
 
-        return Response.success().message("删除成功！");
+        return response;
     }
 
 }

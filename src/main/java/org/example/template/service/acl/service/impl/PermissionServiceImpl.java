@@ -2,18 +2,22 @@ package org.example.template.service.acl.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import org.example.template.common.servicebase.exception.ServiceException;
-import org.example.template.common.utils.ResponseCode;
+import org.example.template.common.utils.Response;
 import org.example.template.service.acl.entity.Permission;
 import org.example.template.service.acl.entity.RolePermission;
 import org.example.template.service.acl.mapper.PermissionMapper;
 import org.example.template.service.acl.service.PermissionService;
 import org.example.template.service.acl.service.RolePermissionService;
+import org.example.template.service.acl.service.RoleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -27,6 +31,8 @@ import java.util.List;
 public class PermissionServiceImpl extends ServiceImpl<PermissionMapper, Permission> implements PermissionService {
     @Autowired
     private RolePermissionService rolePermissionService;
+    @Autowired
+    private RoleService roleService;
 
     @Override
     public List<Permission> getPermissionMenuStructure() {
@@ -43,7 +49,7 @@ public class PermissionServiceImpl extends ServiceImpl<PermissionMapper, Permiss
     public List<Permission> getPermissionTreeByRoleId(String roleId) {
          // 获取所有权限
         List<Permission> permissionList = baseMapper
-                .selectList(new QueryWrapper<Permission>().select("id", "pid", "name"));
+                .selectList(new QueryWrapper<Permission>().select("id", "pid", "name", "weight"));
 
         // 根据角色id获取该角色分配的所有权限的id
         List<String> permissionIdList = rolePermissionService.getPermissionIdListByRoleId(roleId);
@@ -62,7 +68,41 @@ public class PermissionServiceImpl extends ServiceImpl<PermissionMapper, Permiss
     }
 
     @Override
-    public void recursionRemovePermissionsById(String id) {
+    public List<Permission> getAssignedPermissionTreeByUserId(String userId) {
+        // 查询该用户分配的所有权限
+        List<Permission> permissionList = baseMapper.selectPermissionByUserId(userId);
+
+        // 封装成树结构展示
+        List<Permission> assignedPermissionTree = buildTreeStructure(permissionList);
+
+        return assignedPermissionTree;
+    }
+
+    @Override
+    public List<String> getButtonPermissionValuesByUserId(String userId) {
+        // 获取该用户的所有角色
+        List<String> roleIdList = roleService.getAssignedRoleIdsByUserId(userId);
+
+        // 根据角色获取角色分配的所有权限id
+        List<String> permissionIdList = rolePermissionService.getPermissionIdListByRoleIdList(roleIdList);
+
+        // 根据权限id列表获取所有权限
+        if (permissionIdList.isEmpty()) {
+            return new ArrayList<>();
+        }
+        List<Permission> permissionList = baseMapper
+                .selectList(new QueryWrapper<Permission>().select("permission_value")
+                        .eq("type", 2).in("id", permissionIdList));
+
+        // 把权限集合转化为权限值集合
+        List<String> buttonValueList = permissionList.stream()
+                .map(permission -> permission.getPermissionValue()).collect(Collectors.toList());
+
+        return buttonValueList;
+    }
+
+    @Override
+    public Response recursionRemovePermissionsById(String id) {
         // 创建list集合，用于封装所有要删除的权限id值
         List<String> idList = new ArrayList<>();
         // 存入当前的权限id
@@ -72,22 +112,26 @@ public class PermissionServiceImpl extends ServiceImpl<PermissionMapper, Permiss
 
         // 判断是否有角色分配了要删除的权限
         if (judgeRolePermission(idList)) {
-            throw new ServiceException(ResponseCode.SERVICE_ERROR, "有角色分配了要删除的权限，请先解除之后，在进行删除！");
+            return Response.error().message("有角色分配了要删除的权限，请先解除之后，在进行删除！");
         }
 
+        // 进行删除
         baseMapper.deleteBatchIds(idList);
 
+        return Response.success().message("删除成功！");
     }
 
     @Override
-    public void batchRemovePermissions(List<String> idList) {
+    public Response batchRemovePermissions(List<String> idList) {
         // 判断是否有角色分配了要删除的权限
         if (judgeRolePermission(idList)) {
-            throw new ServiceException(ResponseCode.SERVICE_ERROR, "有角色分配了要删除的权限，请先解除之后，在进行删除！");
+            return Response.error().message("有角色分配了要删除的权限，请先解除之后，在进行删除！");
         }
 
         // 删除权限
         baseMapper.deleteBatchIds(idList);
+
+        return Response.success().message("删除成功！");
     }
 
     /**
@@ -127,6 +171,9 @@ public class PermissionServiceImpl extends ServiceImpl<PermissionMapper, Permiss
      * @return 树结构的权限集合
      */
     private List<Permission> buildTreeStructure(List<Permission> permissionList) {
+        // 根据权限权重进行排序，方便前端按照排序展示
+        permissionList.sort((o1, o2) -> o2.getWeight() - o1.getWeight());
+
         // 最终构建好的树结构权限list
         List<Permission> permissionTreeList = new ArrayList<>();
 

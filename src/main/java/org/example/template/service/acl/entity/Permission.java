@@ -60,6 +60,9 @@ public class Permission implements Serializable {
     @ApiModelProperty(value = "状态(0:禁止，1：正常)，默认为1")
     private Integer status;
 
+    @ApiModelProperty(value = "排序权重，默认值为5，值越大排序越靠前 ")
+    private Integer weight;
+
     @ApiModelProperty(value = "层级")
     @TableField(exist = false)
     private Integer level;

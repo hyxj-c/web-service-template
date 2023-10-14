@@ -1,9 +1,12 @@
 package org.example.template.service.acl.controller;
 
 
+import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.extension.api.R;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.example.template.common.utils.Response;
+import org.example.template.service.acl.entity.Permission;
 import org.example.template.service.acl.entity.User;
 import org.example.template.service.acl.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +14,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -25,6 +29,43 @@ import java.util.List;
 public class UserController {
     @Autowired
     private UserService userService;
+
+    @PostMapping("login")
+    @ApiOperation(value = "用户登录")
+    public Response userLogin(@RequestBody User user) {
+        // 验证用户名和密码
+        String username = user.getUsername();
+        String password = user.getPassword();
+        if (username != null && "".equals(username)) {
+            return Response.error().message("用户名不能为空！");
+        }
+        if (password != null && "".equals(password)) {
+            return Response.error().message("密码不能为空！");
+        }
+
+        User userInfo = userService.login(username, password);
+        if (userInfo == null) {
+            return Response.error().message("用户名或密码错误!");
+        }
+
+        return Response.success().data("item", userInfo).data("token", "mytoken");
+    }
+
+    @GetMapping("getPermissionRoute/{userId}")
+    @ApiOperation(value = "根据用户id获取该用户的权限路由")
+    public Response getPermissionRoute(@PathVariable String userId) {
+        List<JSONObject> permissionRoute = userService.getPermissionRouteByUserId(userId);
+
+        return Response.success().data("item", permissionRoute);
+    }
+
+    @GetMapping("getUserInfo/{userId}")
+    @ApiOperation(value = "根据用户id获取用户信息")
+    public Response getUserInfo(@PathVariable String userId) {
+        Map<String, Object> userInfo = userService.getUserInfoByUserId(userId);
+
+        return Response.success().data(userInfo);
+    }
 
     @GetMapping("{current}/{size}")
     @ApiOperation(value = "获取用户列表")
