@@ -2,11 +2,9 @@ package org.example.template.service.acl.controller;
 
 
 import com.alibaba.fastjson.JSONObject;
-import com.baomidou.mybatisplus.extension.api.R;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.example.template.common.utils.Response;
-import org.example.template.service.acl.entity.Permission;
 import org.example.template.service.acl.entity.User;
 import org.example.template.service.acl.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,6 +47,21 @@ public class UserController {
         }
 
         return Response.success().data("item", userInfo).data("token", "mytoken");
+    }
+
+    @PutMapping("updatePassword")
+    @ApiOperation(value = "修改用户密码")
+    public Response updateUserPassword(
+            @ApiParam(value = "前端对象需要包含三个参数userId，originalPassword，newPassword")
+            @RequestBody Map<String, String> map)
+    {
+        String userId = map.get("userId");
+        String originalPassword = map.get("originalPassword");
+        String newPassword = map.get("newPassword");
+
+        Response response = userService.updateUserPassword(userId, originalPassword, newPassword);
+
+        return response;
     }
 
     @GetMapping("getPermissionRoute/{userId}")

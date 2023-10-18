@@ -28,6 +28,13 @@ public interface UserService extends IService<User> {
     Response getUserList(long currentPage, long pageSize, User user);
 
     /**
+     * 根据用户名获取用户
+     * @param username 用户名
+     * @return 用户对象
+     */
+    User getUserByUsername(String username);
+
+    /**
      * 添加用户
      * @param user 用户对象
      * @return 响应对象
@@ -40,6 +47,15 @@ public interface UserService extends IService<User> {
      * @return 响应对象
      */
     Response updateUser(User user);
+
+    /**
+     * 修改用户密码
+     * @param userId 用户id
+     * @param originalPassword 原密码
+     * @param newPassword 新密码
+     * @return 响应对象
+     */
+    Response updateUserPassword(String userId, String originalPassword, String newPassword);
 
     /**
      * 根据用户id删除用户

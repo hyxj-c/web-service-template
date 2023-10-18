@@ -4,7 +4,6 @@ import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.sun.org.apache.xpath.internal.SourceTree;
 import org.example.template.common.utils.Response;
 import org.example.template.service.acl.entity.Permission;
 import org.example.template.service.acl.entity.Role;
@@ -57,6 +56,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     @Override
+    public User getUserByUsername(String username) {
+        User user = baseMapper.selectOne(new QueryWrapper<User>().eq("username", username));
+
+        return user;
+    }
+
+    @Override
     public Response addUser(User user) {
         // 判断用户名是否存在
         if (userNameExist(user.getUsername())) {
@@ -77,6 +83,23 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         }
 
         // 修改用户
+        baseMapper.updateById(user);
+
+        return Response.success().message("修改成功！");
+    }
+
+    @Override
+    public Response updateUserPassword(String userId, String originalPassword, String newPassword) {
+        // 判断用户的原密码是否正确
+        User user = baseMapper.selectById(userId);
+        if (!originalPassword.equals(user.getPassword())) {
+            return Response.error().message("原密码不正确！");
+        }
+
+        // 进行修改
+        user = new User();
+        user.setId(userId);
+        user.setPassword(newPassword);
         baseMapper.updateById(user);
 
         return Response.success().message("修改成功！");
@@ -153,7 +176,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         if (user != null) {
             userInfo.put("id", user.getId());
             userInfo.put("username", user.getUsername());
-            userInfo.put("avatar", "头像地址");
+            userInfo.put("avatar", "");
             if (StringUtils.hasLength(user.getRoleName())) {
                 userInfo.put("roles", user.getRoleName().split("、"));
             }
