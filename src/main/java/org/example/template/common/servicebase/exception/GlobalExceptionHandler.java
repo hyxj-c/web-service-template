@@ -3,6 +3,7 @@ package org.example.template.common.servicebase.exception;
 import lombok.extern.slf4j.Slf4j;
 import org.example.template.common.utils.Response;
 import org.example.template.common.utils.ResponseCode;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -22,7 +23,7 @@ public class GlobalExceptionHandler {
     public Response exceptionHandler(Exception e) {
         e.printStackTrace();
         // 输出错误日志，以便写入日志文件
-        log.error(e.getClass().getName() + "--" + e.getMessage());
+        log.error(e.getClass().getName() + "--" + e.getMessage() + "\n");
 
         return Response.error().message("出错了，请稍后再试...");
     }
@@ -32,7 +33,7 @@ public class GlobalExceptionHandler {
     @ResponseBody
     public Response methodArgumentNotValidExceptionHandler(MethodArgumentNotValidException e) {
         e.printStackTrace();
-        log.error("MethodArgumentNotValidException--" + e.getMessage());
+        log.error("MethodArgumentNotValidException--" + e.getMessage() + "\n");
 
         // 从异常对象中拿到ObjectError对象
         ObjectError objectError = e.getBindingResult().getAllErrors().get(0);
@@ -40,12 +41,20 @@ public class GlobalExceptionHandler {
         return Response.error().code(ResponseCode.ARGUMENT_VALIDATE_ERROR).message(objectError.getDefaultMessage());
     }
 
+    // 使用spring security后，无权限访问的异常
+    @ExceptionHandler(AccessDeniedException.class)
+    public void error(AccessDeniedException e) {
+        log.error("AccessDeniedException--" + e.getMessage() + "\n");
+        // 这里抛出异常，让无权访问处理器统一处理
+        throw e;
+    }
+
     // 特定异常
     @ExceptionHandler(ArithmeticException.class)
     @ResponseBody
     public Response arithmeticExceptionHandler(ArithmeticException e) {
         e.printStackTrace();
-        log.error("ArithmeticException--" + e.getMessage());
+        log.error("ArithmeticException--" + e.getMessage() + "\n");
 
         return Response.error().message("执行了特定异常");
     }
@@ -55,7 +64,7 @@ public class GlobalExceptionHandler {
     @ResponseBody
     public Response serviceExceptionHandler(ServiceException e) {
         e.printStackTrace();
-        log.error("ServiceException--" + e.getMsg());
+        log.error("ServiceException--" + e.getMsg() + "\n");
 
         return Response.error().code(e.getCode()).message(e.getMsg());
     }

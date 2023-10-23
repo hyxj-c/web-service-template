@@ -1,12 +1,18 @@
 package org.example.template.common.security.config;
 
+import org.example.template.common.security.filter.AccessAuthenticationFilter;
 import org.example.template.common.security.filter.UserLoginFilter;
 import org.example.template.common.security.handler.AccessDeniedEntrance;
+import org.example.template.common.security.handler.AuthenticationFailedEntrance;
 import org.example.template.common.security.handler.DefaultPasswordEncoder;
+import org.example.template.common.security.handler.UserLogoutHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -21,9 +27,12 @@ import javax.annotation.Resource;
  */
 @Configuration
 @EnableWebSecurity
+@EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Resource
     private UserDetailsService userDetailsService;
+    @Resource
+    private RedisTemplate redisTemplate;
 
     // 基础配置设置
     @Override
@@ -32,18 +41,22 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http.csrf().disable();
 
         // 配置请求处理
-        http.authorizeRequests()
-                .antMatchers("/swagger-ui.html/**", "/swagger-resources/**", "/webjars/**",
-                        "/v2/**", "/acl/user/login").permitAll() // 配置未认证可访问的路径
-                .anyRequest().authenticated();
+        http.authorizeRequests().anyRequest().authenticated();
 
         // 添加过滤器
-        http.addFilter(new UserLoginFilter(authenticationManager())); // 登录过滤器
+        http.addFilter(new UserLoginFilter(authenticationManager(), redisTemplate)) // 登录过滤器
+                .addFilter(new AccessAuthenticationFilter(authenticationManager(), redisTemplate)); // 访问认证过滤器
 
         // 配置处理器
         http.exceptionHandling()
-                .accessDeniedHandler(new AccessDeniedEntrance()); // 无权限访问的处理器
+                .authenticationEntryPoint(new AuthenticationFailedEntrance()) // 认证失败的处理器
+                .accessDeniedHandler(new AccessDeniedEntrance());  // 无权限访问的处理器
 
+        // 配置退出
+        http.logout().logoutUrl("/security/logout").addLogoutHandler(new UserLogoutHandler(redisTemplate));
+
+        // 开启跨越
+        http.cors();
     }
 
     // 用户认证设置
@@ -51,6 +64,14 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
         // 配置获取用户信息和进行密码校验的类
         auth.userDetailsService(userDetailsService).passwordEncoder(new DefaultPasswordEncoder());
+    }
+
+    // web安全配置
+    @Override
+    public void configure(WebSecurity web) throws Exception {
+        // 配置不进入认证过滤器认证就可以访问的路径
+        web.ignoring().antMatchers("/swagger-ui.html/**", "/swagger-resources/**",
+                "/webjars/**", "/v2/**"); // swagger资源路径
     }
 
     // 过滤器配置跨域
@@ -64,6 +85,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
 
-        return  new CorsFilter(source);
+        return new CorsFilter(source);
     }
 }

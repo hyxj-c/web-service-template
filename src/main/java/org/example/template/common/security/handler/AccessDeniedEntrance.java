@@ -1,7 +1,7 @@
 package org.example.template.common.security.handler;
 
-import org.example.template.common.servicebase.exception.ServiceException;
-import org.example.template.common.utils.ResponseCode;
+import org.example.template.common.utils.Response;
+import org.example.template.common.utils.ResponseUtil;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.web.access.AccessDeniedHandler;
 
@@ -17,7 +17,6 @@ public class AccessDeniedEntrance implements AccessDeniedHandler {
     @Override
     public void handle(HttpServletRequest request, HttpServletResponse response,
                        AccessDeniedException accessDeniedException) throws IOException, ServletException {
-        System.err.println("无权访问");
-        throw new ServiceException(ResponseCode.SERVICE_ERROR, "您没有此操作的权限，请联系管理员添加");
+        ResponseUtil.out(response, Response.error().message("您没有此操作的权限，请联系管理员添加"));
     }
 }

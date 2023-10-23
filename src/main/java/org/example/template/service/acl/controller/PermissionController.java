@@ -7,6 +7,7 @@ import org.example.template.common.utils.Response;
 import org.example.template.service.acl.entity.Permission;
 import org.example.template.service.acl.service.PermissionService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,6 +28,7 @@ public class PermissionController {
     private PermissionService permissionService;
 
     @GetMapping
+    @PreAuthorize("hasAuthority('permission.list')")
     @ApiOperation(value = "获取菜单结构权限")
     public Response getPermissionMenu(){
         List<Permission> permissionMenuStructure = permissionService.getPermissionMenuStructure();
@@ -35,6 +37,7 @@ public class PermissionController {
     }
 
     @GetMapping("{roleId}")
+    @PreAuthorize("hasAuthority('role.viewPermission')")
     @ApiOperation(value = "根据角色id获取树结构权限")
     public Response getPermissionTree(@PathVariable String roleId) {
         List<Permission> permissionTreeList = permissionService.getPermissionTreeByRoleId(roleId);
@@ -43,6 +46,7 @@ public class PermissionController {
     }
 
     @PostMapping
+    @PreAuthorize("hasAuthority('permission.add')")
     @ApiOperation(value = "添加权限")
     public Response addPermission(@Validated @RequestBody Permission permission) {
         permissionService.save(permission);
@@ -51,6 +55,7 @@ public class PermissionController {
     }
 
     @PutMapping
+    @PreAuthorize("hasAuthority('permission.update')")
     @ApiOperation(value = "修改权限")
     public Response updatePermission(@RequestBody Permission permission) {
         permissionService.updateById(permission);
@@ -59,6 +64,7 @@ public class PermissionController {
     }
 
     @DeleteMapping("recursionRemove/{id}")
+    @PreAuthorize("hasAuthority('permission.remove')")
     @ApiOperation(value = "递归删除权限")
     public Response recursionRemovePermissions(@PathVariable String id) {
         Response response = permissionService.recursionRemovePermissionsById(id);
@@ -67,6 +73,7 @@ public class PermissionController {
     }
 
     @DeleteMapping
+    @PreAuthorize("hasAuthority('permission.remove')")
     @ApiOperation(value = "根据id列表批量删除权限")
     public Response batchRemovePermissions(
             @ApiParam(value = "权限id数组", required = true) @RequestBody List<String> idList

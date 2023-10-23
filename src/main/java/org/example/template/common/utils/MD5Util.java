@@ -31,7 +31,7 @@ public class MD5Util {
      * @param bytes 字节数组
      * @return 2倍bytes长度的字符串
      */
-    public static String generate32Str(byte[] bytes) {
+    private static String generate32Str(byte[] bytes) {
         char hexChars[] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
                 'a', 'b', 'c', 'd', 'e', 'f' };
         char[] chars = new char[bytes.length * 2]; // 长度为32的字符数组，bytes的长度为16

@@ -2,6 +2,7 @@ package org.example.template.common.servicebase.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import springfox.documentation.builders.ApiInfoBuilder;
 import springfox.documentation.builders.PathSelectors;
@@ -15,6 +16,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
  * Swagger配置类
  * 文档访问地址为localhost://swagger-ui.html
  */
+@Profile({"dev", "test"}) // 只在开发测试环境使用
 @Configuration // 标注是配置类的注解
 @EnableSwagger2 // swagger注解
 public class SwaggerConfig implements WebMvcConfigurer {

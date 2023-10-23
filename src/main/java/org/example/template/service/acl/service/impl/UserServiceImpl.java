@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import org.example.template.common.utils.MD5Util;
 import org.example.template.common.utils.Response;
 import org.example.template.service.acl.entity.Permission;
 import org.example.template.service.acl.entity.Role;
@@ -69,6 +70,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             return Response.error().message("用户名已存在！");
         }
 
+        // 对密码进行加密处理
+        user.setPassword(MD5Util.encrypt(user.getPassword()));
+
         // 添加用户到数据库
         baseMapper.insert(user);
 
@@ -92,14 +96,14 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     public Response updateUserPassword(String userId, String originalPassword, String newPassword) {
         // 判断用户的原密码是否正确
         User user = baseMapper.selectById(userId);
-        if (!originalPassword.equals(user.getPassword())) {
+        if (!MD5Util.encrypt(originalPassword).equals(user.getPassword())) {
             return Response.error().message("原密码不正确！");
         }
 
         // 进行修改
         user = new User();
         user.setId(userId);
-        user.setPassword(newPassword);
+        user.setPassword(MD5Util.encrypt(newPassword));
         baseMapper.updateById(user);
 
         return Response.success().message("修改成功！");
@@ -159,16 +163,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     @Override
-    public User login(String username, String password) {
-        QueryWrapper<User> queryWrapper = new QueryWrapper();
-        queryWrapper.select("id", "username", "role_name");
-        queryWrapper.eq("username", username).eq("password", password);
-        User user = baseMapper.selectOne(queryWrapper);
-
-        return user;
-    }
-
-    @Override
     public Map<String, Object> getUserInfoByUserId(String userId) {
         Map<String, Object> userInfo = new HashMap<>();
         // 获取该用户信息
@@ -189,7 +183,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     @Override
-    public List<JSONObject> getPermissionRouteByUserId(String userId) {
+    public List<JSONObject> getRouteMenuByUserId(String userId) {
         // 根据用户id获取已分配的权限树结构
         List<Permission> permissionTree = permissionService.getAssignedPermissionTreeByUserId(userId);
 

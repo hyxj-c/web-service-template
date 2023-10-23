@@ -77,14 +77,6 @@ public interface UserService extends IService<User> {
     void saveUserRoleRelation(String userId, List<String> roleIdList);
 
     /**
-     * 用户登录
-     * @param username 用户名
-     * @param password 密码
-     * @return 用户信息
-     */
-    User login(String username, String password);
-
-    /**
      * 根据用户id获取该用户的信息
      * @param userId 用户id
      * @return 用户信息键值
@@ -92,10 +84,10 @@ public interface UserService extends IService<User> {
     Map<String, Object> getUserInfoByUserId(String userId);
 
     /**
-     * 根据用户id获取该用户的权限路由
+     * 根据用户id获取该用户的路由菜单
      * @param userId 用户id
      * @return 权限列表
      */
-    List<JSONObject> getPermissionRouteByUserId(String userId);
+    List<JSONObject> getRouteMenuByUserId(String userId);
 
 }

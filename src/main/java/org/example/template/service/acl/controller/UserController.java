@@ -8,6 +8,8 @@ import org.example.template.common.utils.Response;
 import org.example.template.service.acl.entity.User;
 import org.example.template.service.acl.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,59 +30,27 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-    @PostMapping("login")
-    @ApiOperation(value = "用户登录")
-    public Response userLogin(@RequestBody User user) {
-        // 验证用户名和密码
-        String username = user.getUsername();
-        String password = user.getPassword();
-        if (username != null && "".equals(username)) {
-            return Response.error().message("用户名不能为空！");
-        }
-        if (password != null && "".equals(password)) {
-            return Response.error().message("密码不能为空！");
-        }
+    @GetMapping("getUserInfo")
+    @ApiOperation(value = "获取用户信息")
+    public Response getUserInfo() {
+        // 从安全上下文中获取用户id
+        String userId = SecurityContextHolder.getContext().getAuthentication().getName();
 
-        User userInfo = userService.login(username, password);
-        if (userInfo == null) {
-            return Response.error().message("用户名或密码错误!");
-        }
-
-        return Response.success().data("item", userInfo).data("token", "mytoken");
-    }
-
-    @PutMapping("updatePassword")
-    @ApiOperation(value = "修改用户密码")
-    public Response updateUserPassword(
-            @ApiParam(value = "前端对象需要包含三个参数userId，originalPassword，newPassword")
-            @RequestBody Map<String, String> map)
-    {
-        String userId = map.get("userId");
-        String originalPassword = map.get("originalPassword");
-        String newPassword = map.get("newPassword");
-
-        Response response = userService.updateUserPassword(userId, originalPassword, newPassword);
-
-        return response;
-    }
-
-    @GetMapping("getPermissionRoute/{userId}")
-    @ApiOperation(value = "根据用户id获取该用户的权限路由")
-    public Response getPermissionRoute(@PathVariable String userId) {
-        List<JSONObject> permissionRoute = userService.getPermissionRouteByUserId(userId);
-
-        return Response.success().data("item", permissionRoute);
-    }
-
-    @GetMapping("getUserInfo/{userId}")
-    @ApiOperation(value = "根据用户id获取用户信息")
-    public Response getUserInfo(@PathVariable String userId) {
         Map<String, Object> userInfo = userService.getUserInfoByUserId(userId);
 
         return Response.success().data(userInfo);
     }
 
+    @GetMapping("getRouteMenu/{userId}")
+    @ApiOperation(value = "根据用户id获取该用户的路由菜单")
+    public Response getRouteMenu(@PathVariable String userId) {
+        List<JSONObject> routeMenu = userService.getRouteMenuByUserId(userId);
+
+        return Response.success().data("item", routeMenu);
+    }
+
     @GetMapping("{current}/{size}")
+    @PreAuthorize("hasAuthority('user.list')")
     @ApiOperation(value = "获取用户列表")
     public Response getUsers(
             @ApiParam(value = "要查询的页数", required = true) @PathVariable long current,
@@ -101,6 +71,7 @@ public class UserController {
     }
 
     @PostMapping
+    @PreAuthorize("hasAuthority('user.add')")
     @ApiOperation(value = "添加用户")
     public Response addUser(@Validated @RequestBody User user) {
         Response response = userService.addUser(user);
@@ -109,6 +80,7 @@ public class UserController {
     }
 
     @PutMapping
+    @PreAuthorize("hasAuthority('user.update')")
     @ApiOperation(value = "修改用户")
     public Response updateUser(@RequestBody User user) {
         Response response = userService.updateUser(user);
@@ -116,7 +88,23 @@ public class UserController {
         return response;
     }
 
+    @PutMapping("updatePassword")
+    @ApiOperation(value = "修改用户密码")
+    public Response updateUserPassword(
+            @ApiParam(value = "前端对象需要包含三个参数userId，originalPassword，newPassword")
+            @RequestBody Map<String, String> map)
+    {
+        String userId = map.get("userId");
+        String originalPassword = map.get("originalPassword");
+        String newPassword = map.get("newPassword");
+
+        Response response = userService.updateUserPassword(userId, originalPassword, newPassword);
+
+        return response;
+    }
+
     @DeleteMapping("{id}")
+    @PreAuthorize("hasAuthority('user.remove')")
     @ApiOperation(value = "删除用户")
     public Response removeUser(@PathVariable String id) {
         userService.removeUserById(id);
@@ -125,6 +113,7 @@ public class UserController {
     }
 
     @DeleteMapping
+    @PreAuthorize("hasAuthority('user.remove')")
     @ApiOperation(value = "根据id列表批量删除用户")
     public Response batchRemoveUsers(
             @ApiParam(value = "用户id数组", required = true) @RequestBody List<String> idList
@@ -135,6 +124,7 @@ public class UserController {
     }
 
     @PostMapping("assignRole")
+    @PreAuthorize("hasAuthority('user.assignRole')")
     @ApiOperation(value = "给用户分配角色")
     public Response assignRole(@RequestParam String userId, @RequestBody List<String> roleIdList) {
         userService.saveUserRoleRelation(userId, roleIdList);

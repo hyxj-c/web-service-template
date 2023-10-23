@@ -7,6 +7,7 @@ import org.example.template.common.utils.Response;
 import org.example.template.service.acl.entity.Role;
 import org.example.template.service.acl.service.RoleService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,6 +28,7 @@ public class RoleController {
     private RoleService roleService;
 
     @GetMapping("{current}/{size}")
+    @PreAuthorize("hasAuthority('role.list')")
     @ApiOperation(value = "获取角色列表")
     public Response getRoles(
             @ApiParam(value = "要查询的页数", required = true) @PathVariable long current,
@@ -47,6 +49,7 @@ public class RoleController {
     }
 
     @GetMapping("getAssignedRoleIds/{userId}")
+    @PreAuthorize("hasAuthority('user.viewRole')")
     @ApiOperation(value = "根据用户id获取该用户分配的角色id")
     public Response getAssignedRoleIdsByUserId(@PathVariable String userId) {
         List<String> roleIdList = roleService.getAssignedRoleIdsByUserId(userId);
@@ -65,6 +68,7 @@ public class RoleController {
     }
 
     @PostMapping
+    @PreAuthorize("hasAuthority('role.add')")
     @ApiOperation(value = "添加角色")
     public Response addRole(
             @ApiParam(value = "角色对象，只有name属性是必须的，其它属性自动生成", required = true)
@@ -77,6 +81,7 @@ public class RoleController {
 
     @PutMapping
     @ApiOperation(value = "修改角色")
+    @PreAuthorize("hasAuthority('role.update')")
     public Response updateRole(@RequestBody Role role) {
         Response response = roleService.updateRole(role);
 
@@ -84,6 +89,7 @@ public class RoleController {
     }
 
     @DeleteMapping("{id}")
+    @PreAuthorize("hasAuthority('role.remove')")
     @ApiOperation(value = "删除角色")
     public Response removeRole(@PathVariable String id) {
         Response response = roleService.removeRoleById(id);
@@ -92,6 +98,7 @@ public class RoleController {
     }
 
     @DeleteMapping
+    @PreAuthorize("hasAuthority('role.remove')")
     @ApiOperation(value = "根据id列表批量删除角色")
     public Response batchRemoveRoles(
             @ApiParam(value = "角色id数组", required = true) @RequestBody List<String> idList
@@ -102,6 +109,7 @@ public class RoleController {
     }
 
     @PostMapping("assignPermission")
+    @PreAuthorize("hasAuthority('role.assignPermission')")
     @ApiOperation(value = "给角色分配权限")
     public Response assignPermission(@RequestParam String roleId, @RequestBody List<String> permissionIdList) {
         roleService.saveRolePermissionRelation(roleId, permissionIdList);
