@@ -20,6 +20,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 用户登录过滤器，对用户名密码进行校验
@@ -67,7 +68,8 @@ public class UserLoginFilter extends UsernamePasswordAuthenticationFilter {
         String token = JWTUtil.generateToken(currentUser.getId(), currentUser.getUsername());
 
         // 把用户的权限信息存入redis
-        redisTemplate.opsForValue().set(currentUser.getId(), user.getPermissionValueList());
+        redisTemplate.opsForValue().set(currentUser.getId(), user.getPermissionValueList(),
+                JWTUtil.EXPIRE, TimeUnit.MILLISECONDS);
 
         // 响应前端
         ResponseUtil.out(response, Response.success().data("id", currentUser.getId()).data("token", token));

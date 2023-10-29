@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 访问认证过滤器，用户每次访问都会走此过滤器，用于用户访问的认证
@@ -67,6 +68,10 @@ public class AccessAuthenticationFilter extends BasicAuthenticationFilter {
         if (permissionValueList == null) {
             return null;
         }
+
+        // 更新redis过期时间
+        redisTemplate.expire(userId, JWTUtil.EXPIRE, TimeUnit.MILLISECONDS);
+
         // 封装成GrantedAuthority集合对象的形式
         Collection<GrantedAuthority> authorities = new ArrayList<>();
         for (String permission : permissionValueList) {
