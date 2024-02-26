@@ -161,7 +161,7 @@
     </springProfile>
 
     <!-- 生产环境 -->
-    <springProfile name="pro">
+    <springProfile name="prod">
         <root level="info">
             <!-- 生产环境最好不配置console写文件 -->
             <appender-ref ref="INFO_FILE" />
